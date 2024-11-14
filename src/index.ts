@@ -148,7 +148,10 @@ console.log("Proyectos con tareas:", JSON.stringify(projects, null, 2));
 
 // Ejemplo: Resumen de los proyectos
 const projectSummary = taskbyState(projects);
-
 // Mostrar los resultados
 console.log("Resumen de los proyectos:", JSON.stringify(projectSummary, null, 2));
 
+// Ejemplo: Ordenar tareas por fecha límite
+const sortedProjects = sortDate(projects);
+// Mostrar los resultados
+console.log("Proyectos con tareas ordenadas por fecha límite:", JSON.stringify(sortedProjects, null, 2));
