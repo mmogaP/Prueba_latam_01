@@ -126,6 +126,44 @@ const sortDate = (projects: Project[]): Project[] => {
     }))
 }
 
+/* Análisis avanzado de tareas */
+
+/* Funcion de orden superior tomando una funcion como argumento */
+const filterProjectTasks = (projects: Project, filterfn: (task: Task) => boolean): Task[] => {
+    return projects.tasks.filter(filterfn);
+}
+
+//dias que faltan para completar todas las tareas
+const calculateDaysLeft = (project: Project): number => {
+    const today = new Date();
+    const lastTaskDate = project.tasks.reduce((latestDate, task) => {
+        return task.limitDate > latestDate ? task.limitDate : latestDate;
+    }, today);
+    return Math.ceil((lastTaskDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+//Obtener tareas criticas que están a 3 dias de vencer
+const getCriticalTasks = (project: Project): Task[] => {
+    const daysLeft = calculateDaysLeft(project);
+    return filterProjectTasks(project, (task) => calculateDaysLeft(project) <= 3);
+}
+
+
+//Sincronización y actualización en tiempo real
+
+//Get project details using async/await simulating a long API call
+const getProjectDetails = async (projectId: number): Promise<Project> => {
+    return new Promise<Project>((resolve, reject) => {
+        setTimeout(() => {
+            const project = projects.find((p) => p.id === projectId);
+            if (project) {
+                resolve(project);
+            } else {
+                reject(new Error(`Project with ID ${projectId} not found`));
+            }
+        }, 1000);
+    });
+};
 
 /* Asignar tareas a los proyectos usando addTask */
 try {
@@ -143,15 +181,28 @@ try {
 }
 
 /* Mostrar los proyectos con las tareas asignadas */
-console.log("Proyectos con tareas:", JSON.stringify(projects, null, 2));
+//console.log("Proyectos con tareas:", JSON.stringify(projects, null, 2));
 
 
 // Ejemplo: Resumen de los proyectos
-const projectSummary = taskbyState(projects);
+//const projectSummary = taskbyState(projects);
 // Mostrar los resultados
-console.log("Resumen de los proyectos:", JSON.stringify(projectSummary, null, 2));
+//console.log("Resumen de los proyectos:", JSON.stringify(projectSummary, null, 2));
 
 // Ejemplo: Ordenar tareas por fecha límite
-const sortedProjects = sortDate(projects);
+//const sortedProjects = sortDate(projects);
 // Mostrar los resultados
-console.log("Proyectos con tareas ordenadas por fecha límite:", JSON.stringify(sortedProjects, null, 2));
+//console.log("Proyectos con tareas ordenadas por fecha límite:", JSON.stringify(sortedProjects, null, 2));
+
+//const pendingTasks = filterProjectTasks(projects[1], task => task.state === "pending");
+//console.log("Tareas pendientes del proyecto 2:", JSON.stringify(pendingTasks, null, 2));
+
+const daysLeft = calculateDaysLeft(projects[0]);
+console.log("Días restantes para completar todas las tareas del proyecto 1:", daysLeft);
+
+const criticalTasks = getCriticalTasks(projects[1]);
+console.log("Tareas criticas del proyecto 2:", JSON.stringify(criticalTasks, null, 2));
+
+//TODO: Ejemplo: Obtener detalles de un proyecto
+const projectDetails = getProjectDetails(1);
+console.log("Detalles del proyecto 1:", JSON.stringify(projectDetails, null, 2));
