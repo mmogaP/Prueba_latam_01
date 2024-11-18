@@ -1,3 +1,8 @@
+import { EventEmitter } from 'events';
+
+/* Crear un emisor de eventos */
+const taskEventEmitter = new EventEmitter();
+
 /* Techflow */
 
 /* Primero crear interfaces */
@@ -153,17 +158,38 @@ const getCriticalTasks = (project: Project): Task[] => {
 
 //Get project details using async/await simulating a long API call
 const getProjectDetails = async (projectId: number): Promise<Project> => {
-    return new Promise<Project>((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         setTimeout(() => {
+            /* Find project by id */
             const project = projects.find((p) => p.id === projectId);
             if (project) {
+                console.log(`Detalles del proyecto ${projectId}:`, JSON.stringify(project, null, 2));
                 resolve(project);
             } else {
-                reject(new Error(`Project with ID ${projectId} not found`));
+                console.error(`Project with id ${projectId} not found`);
+                reject(new Error(`Project with id ${projectId} not found`));
             }
         }, 1000);
     });
 };
+
+/* Update state of a task */
+const updateTaskState = (task: Task, newState: "pending" | "in progress" | "finish"): Task => {
+    try {
+        task.state = newState;
+        taskEventEmitter.emit("taskUpdated", task);
+        return task;
+    } catch (error) {
+        console.error("Error al actualizar el estado de la tarea:", error);
+        throw error;
+    }
+};
+
+/* Task notifications with event emitter*/
+taskEventEmitter.on("taskUpdated", (task: Task) => {
+    console.log(`Tarea actualizada: ${JSON.stringify(task, null, 2)}`);
+})
+
 
 /* Asignar tareas a los proyectos usando addTask */
 try {
@@ -175,6 +201,8 @@ try {
 
     addTask(projects[2], tasks[4]); // Proyecto 3: Tarea 5
     addTask(projects[2], tasks[5]); // Proyecto 3: Tarea 6
+
+    updateTaskState(tasks[0], "in progress");
 
 } catch (error) {
     console.error("Error al asignar tarea:", error);
@@ -197,12 +225,15 @@ try {
 //const pendingTasks = filterProjectTasks(projects[1], task => task.state === "pending");
 //console.log("Tareas pendientes del proyecto 2:", JSON.stringify(pendingTasks, null, 2));
 
-const daysLeft = calculateDaysLeft(projects[0]);
+/* const daysLeft = calculateDaysLeft(projects[0]);
 console.log("Días restantes para completar todas las tareas del proyecto 1:", daysLeft);
 
 const criticalTasks = getCriticalTasks(projects[1]);
 console.log("Tareas criticas del proyecto 2:", JSON.stringify(criticalTasks, null, 2));
 
-//TODO: Ejemplo: Obtener detalles de un proyecto
-const projectDetails = getProjectDetails(1);
-console.log("Detalles del proyecto 1:", JSON.stringify(projectDetails, null, 2));
+getProjectDetails(1) */
+
+
+
+
+
